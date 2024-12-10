@@ -5,25 +5,25 @@ from rdkit.Chem import Descriptors as dp
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
-
 import pandas as pd
 import numpy as np
+# from pycaret.regression import *
 
-_, (df, _, _), _ = dc.molnet.load_delaney(featurizer='ECFP')
-df = pd.DataFrame(data={'SMILES': df.ids, 'LogS': df.y.flatten()})
+_, (data,), _ = dc.molnet.load_delaney(splitter=None)
+df = pd.DataFrame(data={'SMILES': data.ids, 'LogS': data.y.flatten()})
 
 mols = [Chem.MolFromSmiles(mol) for mol in df.SMILES]
 
-def genDescLogS(smiles):
+def genDescLogS():
     data = [[dp.MolLogP(mol), dp.MolWt(mol), dp.NumRotatableBonds(mol)] for mol in mols]
     return data
 
-def aromaticAtoms(smiles):
+def aromaticAtoms():
     data = [sum([atom.GetIsAromatic() for atom in mol.GetAtoms()])/dp.HeavyAtomCount(mol) for mol in mols]
     return data
 
-df1 = pd.DataFrame(genDescLogS(df.SMILES), columns=['LogP', 'Weight', 'Rotatable Bonds'])
-df2 = pd.DataFrame(aromaticAtoms(df.SMILES), columns=['Aromatic Proportion'])
+df1 = pd.DataFrame(genDescLogS(), columns=['LogP', 'Weight', 'Rotatable Bonds'])
+df2 = pd.DataFrame(aromaticAtoms(), columns=['Aromatic Proportion'])
 
 x = pd.concat([df1, df2], axis=1)
 y = df.iloc[:, 1]
